@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - GroupGlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .quiz-title {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .participant-info {
+            text-align: right;
+        }
+        
+        .participant-name {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .participant-score {
+            color: #28a745;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .timer {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 20px;
+        }
+
+        .timer.low {
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        .question-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+        
+        .question-text {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .question-progress {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            border-color: #007bff;
+            background-color: #f0f7ff;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-btn input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .submit-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .leaderboard {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .leaderboard h3 {
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #007bff;
+            min-width: 30px;
+        }
+
+        .name {
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .score {
+            font-weight: bold;
+            color: #28a745;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .quiz-complete {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .quiz-complete.active {
+            display: block;
+        }
+
+        .quiz-complete h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .final-score {
+            color: #28a745;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .sync-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .leaderboard {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sync-status" id="syncStatus">Syncing...</div>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <div class="quiz-title" id="quizTitle">{{ quiz.title }}</div>
+                <div class="participant-info">
+                    <div class="participant-name" id="participantName">{{ participant.name }}</div>
+                    <div class="participant-score">Score: <span id="userScore">{{ participant.score }}</span></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="btn-group">
+                    <button id="startBtn" onclick="startQuiz()">Start Quiz</button>
+                    <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+                </div>
+                <div class="timer" id="timer" style="display: none;">Time: <span id="timerValue">30</span>s</div>
+            </div>
+
+            <div class="loading" id="loadingDiv">
+                Waiting for quiz to start...
+            </div>
+
+            <div class="question-container" id="questionContainer">
+                <div class="question-progress" id="questionProgress"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+                <div class="submit-group">
+                    <button onclick="submitAnswer()">Submit Answer</button>
+                </div>
+            </div>
+
+            <div class="quiz-complete" id="quizComplete">
+                <h2>🎉 Quiz Complete!</h2>
+                <p>You've answered all the questions.</p>
+                <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+                <p>Thank you for playing GroupGlow!</p>
+                <br>
+                <a href="/" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 30px; text-decoration: none; border-radius: 4px;">Back to Home</a>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <h3>🏆 Leaderboard</h3>
+            <div id="leaderboardList">
+                <div style="padding: 20px; text-align: center; color: #999;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const roomCode = '{{ room.room_code }}';
+        const participantName = '{{ participant.name }}';
+        let currentQuestion = null;
+        let timerInterval = null;
+        let timeRemaining = 30;
+        let hasAnswered = false;
+        let pollInterval = null;
+
+        // Start polling for updates
+        function initPolling() {
+            // Poll for leaderboard every 2 seconds
+            setInterval(updateLeaderboard, 2000);
+            
+            // Poll for quiz state every 3 seconds (when a question is visible)
+            pollInterval = setInterval(checkQuizState, 3000);
+        }
+
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+            
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`/api/quiz/${roomCode}${endpoint}`, options);
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                return { status: 'error' };
+            }
+        }
+
+        function startQuiz() {
+            apiCall('/start/', 'POST').then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('startBtn').disabled = true;
+                    checkQuizState();
+                }
+            });
+        }
+
+        function nextQuestion() {
+            apiCall('/next/', 'POST').then(data => {
+                if (data.status === 'success') {
+                    hasAnswered = false;
+                    stopTimer();
+                    checkQuizState();
+                }
+            });
+        }
+
+        function submitAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (!selectedOption) {
+                alert('Please select an answer');
+                return;
+            }
+
+            hasAnswered = true;
+            const answer = selectedOption.value;
+
+            apiCall('/submit/', 'POST', {
+                name: participantName,
+                answer: answer
+            }).then(data => {
+                if (data.status === 'success') {
+                    const resultMessage = data.is_correct ? '✓ Correct!' : '✗ Incorrect';
+                    alert(`${resultMessage}\nCorrect Answer: ${data.correct_answer}\nScore: ${data.is_correct ? '+10' : '-5'}\nTotal: ${data.new_score}`);
+                    document.getElementById('userScore').textContent = data.new_score;
+                    document.getElementById('nextBtn').disabled = false;
+                    
+                    // Disable all options
+                    document.querySelectorAll('input[name="answer"]').forEach(input => {
+                        input.disabled = true;
+                    });
+                    document.querySelector('.submit-group button').disabled = true;
+                    stopTimer();
+                }
+            });
+        }
+
+        function checkQuizState() {
+            apiCall('/state/', 'GET').then(data => {
+                if (data.status === 'complete') {
+                    handleQuizComplete();
+                } else if (data.status === 'in_progress') {
+                    handleQuestion(data);
+                }
+                updateSyncStatus();
+            });
+        }
+
+        function handleQuestion(data) {
+            currentQuestion = data;
+            
+            if (!hasAnswered) {
+                timeRemaining = 30;
+            
+                // Update UI
+                document.getElementById('loadingDiv').style.display = 'none';
+                document.getElementById('questionContainer').classList.add('active');
+
+                // Update question and progress
+                document.getElementById('questionProgress').textContent = `Question ${data.current_index + 1} of ${data.total_questions}`;
+                document.getElementById('questionText').textContent = data.question_text;
+
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+
+                const options = [
+                    { label: 'A', value: 'A', text: data.option_a },
+                    { label: 'B', value: 'B', text: data.option_b },
+                    { label: 'C', value: 'C', text: data.option_c },
+                    { label: 'D', value: 'D', text: data.option_d }
+                ];
+
+                options.forEach(option => {
+                    const label = document.createElement('label');
+                    label.className = 'option-btn';
+                    label.innerHTML = `
+                        <input type="radio" name="answer" value="${option.value}">
+                        <strong>${option.label}.</strong> ${option.text}
+                    `;
+                    optionsContainer.appendChild(label);
+                });
+
+                // Start timer
+                startTimer();
+            }
+        }
+
+        function handleQuizComplete() {
+            stopTimer();
+            document.getElementById('questionContainer').classList.remove('active');
+            document.getElementById('quizComplete').classList.add('active');
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('startBtn').disabled = false;
+            
+            // Get final leaderboard
+            updateLeaderboard();
+        }
+
+        function updateLeaderboard() {
+            apiCall('/leaderboard/', 'GET').then(data => {
+                if (data.status === 'success') {
+                    const leaderboardList = document.getElementById('leaderboardList');
+                    leaderboardList.innerHTML = '';
+
+                    if (data.leaderboard.length === 0) {
+                        leaderboardList.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No participants yet</div>';
+                        return;
+                    }
+
+                    data.leaderboard.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'leaderboard-item';
+                        div.innerHTML = `
+                            <div class="rank">#${item.rank}</div>
+                            <div class="name">${item.name}</div>
+                            <div class="score">${item.score}</div>
+                        `;
+                        leaderboardList.appendChild(div);
+                    });
+                }
+            });
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'inline-block';
+            timeRemaining = 30;
+
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                document.getElementById('timerValue').textContent = timeRemaining;
+
+                if (timeRemaining <= 10) {
+                    document.getElementById('timer').classList.add('low');
+                } else {
+                    document.getElementById('timer').classList.remove('low');
+                }
+
+                if (timeRemaining <= 0) {
+                    stopTimer();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'none';
+        }
+
+        function updateSyncStatus() {
+            document.getElementById('syncStatus').textContent = '✓ Synced';
+            setTimeout(() => {
+                document.getElementById('syncStatus').textContent = 'Syncing...';
+            }, 500);
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initPolling();
+            updateLeaderboard();
+        });
+    </script>
+</body>
+</html>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .quiz-title {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .participant-info {
+            text-align: right;
+        }
+        
+        .participant-name {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .participant-score {
+            color: #28a745;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .timer {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 20px;
+        }
+
+        .timer.low {
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        .question-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+        
+        .question-text {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option-btn {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            border-color: #007bff;
+            background-color: #f0f7ff;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-btn input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .submit-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .leaderboard {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .leaderboard h3 {
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #007bff;
+            min-width: 30px;
+        }
+
+        .name {
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        .score {
+            font-weight: bold;
+            color: #28a745;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .quiz-complete {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .quiz-complete.active {
+            display: block;
+        }
+
+        .quiz-complete h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .final-score {
+            color: #28a745;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .connection-status.connected {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .leaderboard {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status disconnected" id="connectionStatus">Connecting...</div>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="header">
+                <div class="quiz-title" id="quizTitle">GroupGlow Quiz</div>
+                <div class="participant-info">
+                    <div class="participant-name" id="participantName">{{ participant.name }}</div>
+                    <div class="participant-score">Score: <span id="userScore">0</span></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="btn-group">
+                    <button id="startBtn" onclick="startQuiz()">Start Quiz</button>
+                    <button id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+                </div>
+                <div class="timer" id="timer" style="display: none;">Time: <span id="timerValue">30</span>s</div>
+            </div>
+
+            <div class="loading" id="loadingDiv">
+                Waiting for quiz to start...
+            </div>
+
+            <div class="question-container" id="questionContainer">
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+                <div class="submit-group">
+                    <button onclick="submitAnswer()">Submit Answer</button>
+                </div>
+            </div>
+
+            <div class="quiz-complete" id="quizComplete">
+                <h2>🎉 Quiz Complete!</h2>
+                <p>You've answered all the questions.</p>
+                <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+                <p>Thank you for playing GroupGlow!</p>
+                <br>
+                <a href="/" style="display: inline-block; background-color: #007bff; color: white; padding: 10px 30px; text-decoration: none; border-radius: 4px;">Back to Home</a>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <h3>🏆 Leaderboard</h3>
+            <div id="leaderboardList">
+                <div style="padding: 20px; text-align: center; color: #999;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const roomCode = '{{ room.room_code }}';
+        const participantName = '{{ participant.name }}';
+        let socket = null;
+        let currentQuestion = null;
+        let timerInterval = null;
+        let timeRemaining = 30;
+        let hasAnswered = false;
+
+        // Initialize WebSocket connection
+        function initWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            socket = new WebSocket(`${protocol}://${window.location.host}/ws/quiz/${roomCode}/`);
+
+            socket.onopen = function(e) {
+                console.log('WebSocket connection established');
+                document.getElementById('connectionStatus').classList.remove('disconnected');
+                document.getElementById('connectionStatus').classList.add('connected');
+                document.getElementById('connectionStatus').textContent = '✓ Connected';
+                
+                // Send join message
+                socket.send(JSON.stringify({
+                    type: 'join',
+                    name: participantName
+                }));
+            };
+
+            socket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                console.log('Received:', data);
+
+                switch(data.type) {
+                    case 'question':
+                        handleQuestion(data);
+                        break;
+                    case 'leaderboard':
+                        handleLeaderboard(data);
+                        break;
+                    case 'answer_result':
+                        handleAnswerResult(data);
+                        break;
+                    case 'quiz_complete':
+                        handleQuizComplete(data);
+                        break;
+                    case 'user_joined':
+                        console.log(data.message);
+                        break;
+                }
+            };
+
+            socket.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                document.getElementById('connectionStatus').classList.add('disconnected');
+                document.getElementById('connectionStatus').classList.remove('connected');
+                document.getElementById('connectionStatus').textContent = '✗ Error';
+            };
+
+            socket.onclose = function(e) {
+                console.log('WebSocket connection closed');
+                document.getElementById('connectionStatus').classList.add('disconnected');
+                document.getElementById('connectionStatus').classList.remove('connected');
+                document.getElementById('connectionStatus').textContent = '✗ Disconnected';
+            };
+        }
+
+        function startQuiz() {
+            socket.send(JSON.stringify({
+                type: 'start_quiz'
+            }));
+            document.getElementById('startBtn').disabled = true;
+        }
+
+        function nextQuestion() {
+            socket.send(JSON.stringify({
+                type: 'next_question'
+            }));
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        function submitAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (!selectedOption) {
+                alert('Please select an answer');
+                return;
+            }
+
+            hasAnswered = true;
+            const answer = selectedOption.value;
+
+            socket.send(JSON.stringify({
+                type: 'submit_answer',
+                name: participantName,
+                answer: answer
+            }));
+
+            // Disable all options and submit button
+            document.querySelectorAll('input[name="answer"]').forEach(input => {
+                input.disabled = true;
+            });
+            document.querySelector('.submit-group button').disabled = true;
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function handleQuestion(data) {
+            console.log('Handling question:', data);
+            currentQuestion = data;
+            hasAnswered = false;
+            timeRemaining = 30;
+
+            // Update UI
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('questionContainer').classList.add('active');
+
+            // Update question and options
+            document.getElementById('questionText').textContent = data.question_text;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const options = [
+                { label: 'A', value: 'A', text: data.option_a },
+                { label: 'B', value: 'B', text: data.option_b },
+                { label: 'C', value: 'C', text: data.option_c },
+                { label: 'D', value: 'D', text: data.option_d }
+            ];
+
+            options.forEach(option => {
+                const label = document.createElement('label');
+                label.className = 'option-btn';
+                label.innerHTML = `
+                    <input type="radio" name="answer" value="${option.value}">
+                    <strong>${option.label}.</strong> ${option.text}
+                `;
+                optionsContainer.appendChild(label);
+            });
+
+            // Start timer
+            startTimer();
+        }
+
+        function handleLeaderboard(data) {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+
+            if (data.leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No participants yet</div>';
+                return;
+            }
+
+            data.leaderboard.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'leaderboard-item';
+                div.innerHTML = `
+                    <div class="rank">#${item.rank}</div>
+                    <div class="name">${item.name}</div>
+                    <div class="score">${item.score}</div>
+                `;
+                leaderboardList.appendChild(div);
+            });
+        }
+
+        function handleAnswerResult(data) {
+            console.log('Answer result:', data);
+            const resultMessage = data.is_correct ? '✓ Correct!' : '✗ Incorrect';
+            alert(`${resultMessage}\nCorrect Answer: ${data.correct_answer}\nScore: ${data.is_correct ? '+10' : '-5'}`);
+            document.getElementById('userScore').textContent = document.getElementById('userScore').textContent; // Will update when leaderboard updates
+        }
+
+        function handleQuizComplete(data) {
+            console.log('Quiz complete');
+            stopTimer();
+            document.getElementById('questionContainer').classList.remove('active');
+            document.getElementById('quizComplete').classList.add('active');
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'inline-block';
+
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                document.getElementById('timerValue').textContent = timeRemaining;
+
+                if (timeRemaining <= 10) {
+                    document.getElementById('timer').classList.add('low');
+                } else {
+                    document.getElementById('timer').classList.remove('low');
+                }
+
+                if (timeRemaining <= 0) {
+                    stopTimer();
+                    if (!hasAnswered) {
+                        submitAnswer(); // Auto-submit if no answer given
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'none';
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initWebSocket();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('unload', () => {
+            if (socket) {
+                socket.close();
+            }
+        });
+    </script>
+</body>
+</html>

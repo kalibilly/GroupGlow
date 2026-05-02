@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Quiz - GroupGlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button,
+        a.btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        
+        button[type="submit"] {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #218838;
+        }
+        
+        a.btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        a.btn-back:hover {
+            background-color: #5a6268;
+        }
+        
+        .error {
+            color: #dc3545;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Join Quiz Room</h1>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="room_code">Room Code</label>
+                <input type="text" id="room_code" name="room_code" required placeholder="Enter room code">
+            </div>
+            
+            <div class="form-group">
+                <label for="avatar">Select Avatar</label>
+                <select id="avatar" name="avatar">
+                    {% for avatar in avatars %}
+                        <option value="{{ avatar }}">{{ avatar }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="btn-group">
+                <button type="submit">Join Room</button>
+                <a href="{% url 'home' %}" class="btn-back">Go Back</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
