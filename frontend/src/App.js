@@ -3,10 +3,10 @@ import { Routes, Route, useNavigate, useParams, useLocation, Link } from 'react-
 import axios from 'axios';
 import StageScene from './components/StageScene';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = `${process.env.REACT_APP_API_URL}/api`;
 
-const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-const WS_BASE = `${wsProtocol}://${window.location.hostname}:8000/ws/quiz`;
+const backendHostname = process.env.REACT_APP_API_URL.replace(/^https?:\/\//, '');
+const WS_BASE = `wss://${backendHostname}/ws/quiz`;
 
 const getStoredParticipant = () => {
   try {
