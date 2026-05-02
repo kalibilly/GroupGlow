@@ -1,0 +1,22 @@
+{
+  "name": "groupglow-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@react-three/fiber": "^8.16.2",
+    "axios": "^1.6.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.14.1",
+    "three": "^0.166.0"
+  },
+  "devDependencies": {
+    "react-scripts": "5.1.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  }
+}
