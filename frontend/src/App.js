@@ -372,7 +372,7 @@ function HostLogin() {
       navigate('/host/dashboard');
 
     } catch (err) {
-      setError(err.message); // Display the error message from the server if available
+      setError(err.response?.data?.error || err.message); // Display the error message from the server if available
     }
   };
 
