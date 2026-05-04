@@ -3,10 +3,13 @@ import { Routes, Route, useNavigate, useParams, useLocation, Link } from 'react-
 import axios from 'axios';
 import StageScene from './components/StageScene';
 
-const API_BASE = `${process.env.REACT_APP_API_URL}/api`;
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE = `${API_URL}/api`;
 
 const backendHostname = process.env.REACT_APP_API_URL.replace(/^https?:\/\//, '');
-const WS_BASE = `wss://${backendHostname}/ws/quiz`;
+const WS_BASE = API_URL.startsWith('https')
+  ? API_URL.replace(/^https/, 'wss') + '/ws/quiz'
+  : API_URL.replace(/^http/, 'ws') + '/ws/quiz';
 
 const getStoredParticipant = () => {
   try {
@@ -349,18 +352,27 @@ function HostLogin() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     try {
-      const endpoint = mode === 'login' ? `${API_BASE}/auth/login/` : `${API_BASE}/auth/register/`;
-      const body = mode === 'login'
-        ? { username, password }
-        : { username, email, password, password_confirm: confirmPassword };
+      const endpoint =
+        mode === 'login'
+          ? `${API_BASE}/auth/login/`
+          : `${API_BASE}/auth/register/`;
+
+      const body =
+        mode === 'login'
+          ? { username, password }
+          : { username, email, password, password_confirm: confirmPassword };
+
       const data = await fetchApi(endpoint, 'POST', null, body);
+
       setAuthToken(data.token);
       navigate('/host/dashboard');
+
     } catch (err) {
-      setError(err.response?.data?.error || 'Unable to authenticate');
+      setError(err.message); // Display the error message from the server if available
     }
   };
 
